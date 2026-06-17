@@ -1,0 +1,217 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AI Debt Management & Financial Recovery Platform APIs",
+    "version": "2.0.0",
+    "description": "Comprehensive REST APIs for budgeting, debt payoff simulators, forecasting, multilingual AI guidance, and administrative audits."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "preferredLanguage": { "type": "string", "enum": ["en", "te", "hi", "ta"] }
+                },
+                "required": ["name", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "400": { "description": "Invalid input or user already exists" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Authenticate user and get JWT",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/simulator": {
+      "post": {
+        "summary": "Run what-if EMI amortization comparison on a loan",
+        "tags": ["Simulator"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "loanId": { "type": "string" },
+                  "currentEmi": { "type": "number" },
+                  "proposedEmi": { "type": "number" }
+                },
+                "required": ["loanId", "currentEmi", "proposedEmi"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simulation completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "currentPayoffMonths": { "type": "number" },
+                        "newPayoffMonths": { "type": "number" },
+                        "monthsReduced": { "type": "number" },
+                        "interestSaved": { "type": "number" },
+                        "newPayoffDate": { "type": "string", "format": "date-time" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Emi is too small or unsustainable" }
+        }
+      }
+    },
+    "/api/forecast": {
+      "get": {
+        "summary": "Get overall portfolio debt forecast",
+        "tags": ["Forecast"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Forecast compiled successfully" }
+        }
+      }
+    },
+    "/api/recovery-score": {
+      "get": {
+        "summary": "Get Financial Recovery Score metrics",
+        "tags": ["Recovery Score"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Recovery score computed successfully" }
+        }
+      }
+    },
+    "/api/analytics/debt-trend": {
+      "get": {
+        "summary": "Get past 6 months debt reduction history",
+        "tags": ["Analytics"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Historical trend loaded" }
+        }
+      }
+    },
+    "/api/analytics/expense-breakdown": {
+      "get": {
+        "summary": "Get categorized expense allocations",
+        "tags": ["Analytics"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Expense percentages aggregated" }
+        }
+      }
+    },
+    "/api/analytics/payoff-forecast": {
+      "get": {
+        "summary": "Get projected debt balances chart data",
+        "tags": ["Analytics"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Forecast schedule loaded" }
+        }
+      }
+    },
+    "/api/analytics/financial-health-history": {
+      "get": {
+        "summary": "Get past 6 months recovery score history",
+        "tags": ["Analytics"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Score timeline aggregated" }
+        }
+      }
+    },
+    "/api/admin/dashboard": {
+      "get": {
+        "summary": "Get admin metrics aggregations",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Admin metrics calculated" },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "summary": "Get complete user lists for review",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List loaded" }
+        }
+      }
+    },
+    "/api/admin/financial-summary": {
+      "get": {
+        "summary": "Get system-wide financial summaries",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Consolidated sums computed" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
